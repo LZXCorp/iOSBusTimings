@@ -1,7 +1,7 @@
 # iOS 17 Bus Timings Widget
 ![License](https://img.shields.io/badge/license-CC0%201.0-blue)
 
-<img src="https://raw.githubusercontent.com/opp100/bmw-scriptable-widgets/main/screenshots/sc_1.png](https://github.com/LZXCorp/iOSBusTimings/blob/adc02139d2ae5f056e615bbf7cc5d3c01770ab4a/pv.jpg" width="400"/>
+<img src="https://raw.githubusercontent.com/LZXCorp/iOSBusTimings/adc02139d2ae5f056e615bbf7cc5d3c01770ab4a/pv.jpg" width="400"/>
 
 ##  INFORMATION
 An iOS Widget designed to show at a glance the arrival timings of Buses directly on your lockscreen.
