@@ -8,6 +8,11 @@
 let param = args.widgetParameter;
 
 paramArray = param.split(',');
+if (paramArray.length !== 3) {
+    let widget = await createMsgWidget("Invalid Parameter");
+    Script.setWidget(widget);
+    Script.complete();
+}
 
 let loc_label = paramArray[0];
 let busStopId = paramArray[1];
@@ -113,4 +118,17 @@ async function createWidget(loc, service, arrivalTimes, busDeckTypes) {
 
     widget.addSpacer()
     return widget
+}
+
+async function createMsgWidget(msg) {
+    let widget = new ListWidget()
+    widget.setPadding(2, 2, 2, 2)
+
+    let title = widget.addText("ERROR")
+    title.font = Font.boldSystemFont(8)
+    title.centerAlignText()
+
+    let msg = widget.addText(msg)
+    msg.font = Font.boldSystemFont(6)
+    msg.centerAlignText()
 }
