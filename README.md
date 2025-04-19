@@ -1,28 +1,30 @@
-# iOS 17 Bus Timings Widget
+<p>
+    <h1 align="center">SG Bus Lockscreen Widget<br></h1>
+    <p align="center">Have the Bus Timings shown on your lockscreen!</p>
+</p>
 
-![License](https://img.shields.io/badge/license-CC0%201.0-blue)
+<p align="center">
+    <img src="https://raw.githubusercontent.com/LZXCorp/iOSBusTimings/adc02139d2ae5f056e615bbf7cc5d3c01770ab4a/pv.jpg" width="140"/>
+</p>
 
-<img src="https://raw.githubusercontent.com/LZXCorp/iOSBusTimings/adc02139d2ae5f056e615bbf7cc5d3c01770ab4a/pv.jpg" width="140" style="border-radius: 12%"/>
+<p align="center">
+    <a>
+      <img alt="License" src="https://img.shields.io/badge/license-CC0%201.0-blue" />
+    </a>
+</p>
 
-## INFORMATION
+## Information
 
-An iOS Widget designed to show at a glance arrival timings of Buses directly on your lockscreen.
+This iOS Widget shows at a glance the Bus arrival timings of Buses directly on your lockscreen!
+
 This only works for Singapore Public Bus Transits.
 
-## PATCHES
-
-As of the November 2023 Patch,
-
-- New `B - Bendy` Bus Type added, which previously did not exist.
-- There is now error handling for parameters and API errors.
-- Instead of a long string of text indicating 'Undefined' for arrival times, or out-right stop working whens services end, it will now show a 'SERVICE ENDED' badge.
-
-## INSTRUCTIONS
+## Instructions
 
 **❗REQUIRED**
 
 - A API to use the Land Transport DataMall API key. **(DO NOT SHARE IT!!!)**
-- Downloading [Scriptable](https://apps.apple.com/de/app/scriptable/id1405459188) on iOS 16 and above on your iPhone.
+- Downloading [Scriptable](https://apps.apple.com/sg/app/scriptable/id1405459188) on iOS 16 and above on your iPhone.
 
 \
 **🛠️ SETUP**
@@ -37,49 +39,65 @@ As of the November 2023 Patch,
 - Select your Bus Timings script and input the parameters.
 - Parameter Format: Parameter Format: `<label>,<bus stop id>,<bus service>` (Note: Do **not** leave any spacing between the parameters)
 
-## ACRYONYMS
+## Acronyms
 
-**DECK INFO**
+### Deck Information
 
-- **S** - Single Decker
-- **D** - Double Decker
-- **B** - Bendy
+| Acryonym | Full Name     |
+| :------: | ------------- |
+|    S     | Single Decker |
+|    D     | Double Decker |
+|    B     | Bendy         |
 
-\
-**ARRIVAL INFO**
+### Arrival Information
 
-- **A** - Arrived
-- **L** - Left
+| Acryonym | Full Name |
+| :------: | --------- |
+|    A     | Arrived   |
+|    L     | Left      |
 
-\
-**BUS LOAD (TO BE ADDED)**
+### Bus Crowdedness
 
-- **L** - Low Load (Seats Available)
-- **M** - Medium Load (Standing Available)
-- **H** - High Load (Limited Standing)
+| Acryonym | Full Name                        |
+| :------: | -------------------------------- |
+|    L     | Low Load (Seats Available)       |
+|    M     | Medium Load (Standing Available) |
+|    H     | High Load (Limited Standing)     |
 
-## ⚠️ LIMITATIONS ⚠️
+## ⚠️ Limitations ⚠️
 
 - The widget is only designed for iPhone devices.
 - The text might be too small and unreadable for some users.
 - The updating rate of the widget ranges from 30 secs to 5 mins, making it unreliable.
 - Sometimes Scriptable stops updating the widget, requiring a restart.
 
-## WORKING ON
+## Current Patches
 
-From the January 2024 Patch,
+As of the November 2023 Patch,
 
-- [x] **BUG** - Error still occuring when Bus services has terminated for the day
+- New `B - Bendy` Bus Type added, which previously did not exist.
+- There is now error handling for parameters and API errors.
+- Instead of a long string of text indicating 'Undefined' for arrival times, or out-right stop working whens services end, it will now show a 'SERVICE ENDED' badge.
+
+## Feature Tracking
+
+All features are now being tracked in [Issues](https://github.com/LZXCorp/iOSBusTimings/issues).
+
+## Coming Soon
+
+From the April 2024 Patch,
+
+- [ ] **BUG** - Fixed Issues with timings showing `NaN`
+\
+Worked on features,
+
+- [ ] **FEATURE** - Medium Widget (occupies 2 spaces) for better visibility and more room for extra features
 
 \
-Still working on,
+To-do but not actively being worked on,
 
 - [ ] **LIMIT** - Label limitation of 11 characters.
 - [ ] **QOL** - Shows the last updated time of the widget.
-
-\
-Not-started-on features,
-
 - [ ] **FEATURE** - Ability through parameters to change what information is shown at the bottom. (I.e. instead of showing type of bus, it will show the bus load.)
 
 \

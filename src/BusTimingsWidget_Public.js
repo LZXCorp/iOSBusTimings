@@ -1,6 +1,6 @@
 // Variables used by Scriptable.
 // These must be at the very top of the file. Do not edit.
-// icon-color: green; icon-glyph: magic;
+// icon-color: deep-purple; icon-glyph: bus;
 
 // Bus Timings Widget, Made by LZX
 // Use this with the Scriptable Application.
@@ -8,6 +8,8 @@
 // NOTE: THIS WAS DESIGNED TO BE USED ON THE LOCKSCREEN
 // Parameter Format: <label>,<bus stop id>,<bus service>
 // e.g. STADIUM,80199,11
+
+const api_key = "";		// API key for the bus API
 
 let param = args.widgetParameter;
 
@@ -25,16 +27,11 @@ let service = paramArray[2];
 let busInfo = await getBusTimings(busStopId, service);
 let { arrivalTimes, busDeckTypes } = busInfo;
 
-console.log(arrivalTimes);
-console.log(busDeckTypes);
-
 let widget = await createWidget(loc_label, service, arrivalTimes, busDeckTypes);
 Script.setWidget(widget);
 Script.complete();
 
 async function getBusTimings(busStopID, service) {
-	let api_key = ""; // API key for the bus API
-
 	let params = `BusStopCode=${busStopID}&ServiceNo=${service}`;
 	let url = `http://datamall2.mytransport.sg/ltaodataservice/BusArrivalv2?${params}`;
 	let headers = {
@@ -42,7 +39,7 @@ async function getBusTimings(busStopID, service) {
 		AccountKey: api_key,
 	};
 
-	let req = new Request(url);
+	let req = new Request(url, timeoutInterval=5);
 	req.headers = headers;
 
 	data = await req.loadJSON();
@@ -155,4 +152,6 @@ async function createMsgWidget(msg) {
 	let widMsg = widget.addText(msg);
 	widMsg.font = Font.boldSystemFont(6);
 	widMsg.centerAlignText();
+
+	return widget
 }
