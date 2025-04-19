@@ -73,12 +73,15 @@ This only works for Singapore Public Bus Transits.
 
 ## Current Patches
 
-As of the November 2023 Patch,
+As of the 25Q1 Patch,
 
-- New `B - Bendy` Bus Type added, which previously did not exist.
-- There is now error handling for parameters and API errors.
-- Instead of a long string of text indicating 'Undefined' for arrival times, or out-right stop working whens services end, it will now show a 'SERVICE ENDED' badge.
+- Switched from the HTTP BusArrivalV2 Endpoint to HTTPS BusArrivalV3 Endpoint
+- Fixed a ton of mistakes made in the previous patch (causing errors and unintended functionality to occur)
+- Better error handling for params and other components of the script
 
 ## Feature Tracking
 
 All features are now being tracked in [Issues](https://github.com/LZXCorp/iOSBusTimings/issues).
+
+\
+*A simple project made by LZX.*

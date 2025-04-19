@@ -11,41 +11,56 @@
 
 const api_key = "";		// API key for the bus API
 
-let param = args.widgetParameter;
-
-paramArray = param.split(",");
-if (paramArray.length !== 3) {
-	let widget = await createMsgWidget("Invalid Parameter");
+let param;
+try {
+	param = args.widgetParameter;
+} catch {
+	let widget = await createErrWidget("No Params");
 	Script.setWidget(widget);
 	Script.complete();
 }
 
-let loc_label = paramArray[0];
-let busStopId = paramArray[1];
-let service = paramArray[2];
+paramArray = param.split(",");
+if (paramArray.length !== 3) {
+	let widget = await createErrWidget("Invalid Params");
+	Script.setWidget(widget);
+	Script.complete();
+}
+
+const [loc_label, busStopId, service] = paramArray;
 
 let busInfo = await getBusTimings(busStopId, service);
+if (!busInfo) { 
+	let widget = await createErrWidget("Invalid Params");
+	Script.setWidget(widget);
+	Script.complete();
+}
+
 let { arrivalTimes, busDeckTypes } = busInfo;
 
-let widget = await createWidget(loc_label, service, arrivalTimes, busDeckTypes);
+let widget = await createMainWidget(loc_label, service, arrivalTimes, busDeckTypes);
 Script.setWidget(widget);
 Script.complete();
 
 async function getBusTimings(busStopID, service) {
 	let params = `BusStopCode=${busStopID}&ServiceNo=${service}`;
-	let url = `http://datamall2.mytransport.sg/ltaodataservice/BusArrivalv2?${params}`;
+	let url = `https://datamall2.mytransport.sg/ltaodataservice/v3/BusArrival?${params}`;
 	let headers = {
 		accept: "application/json",
 		AccountKey: api_key,
 	};
 
-	let req = new Request(url, timeoutInterval=5);
+	let req = new Request(url, timeoutInterval=15);
 	req.headers = headers;
 
 	data = await req.loadJSON();
+	
+	if (req.response['statusCode'] !== 200) {
+		return null;
+	}
 
 	let services = data.Services;
-	let firstService = services[0];
+	let firstService = services && services.length > 0 ? services[0] : undefined;
 	let arrivalTimes = [];
 	let busDeckTypes = [];
 
@@ -64,11 +79,11 @@ async function getBusTimings(busStopID, service) {
 	return { arrivalTimes, busDeckTypes };
 }
 
-async function createWidget(loc, service, arrivalTimes, busDeckTypes) {
+async function createMainWidget(loc, service, arrivalTimes, busDeckTypes) {
 	let widget = new ListWidget();
 	widget.setPadding(2, 2, 2, 2);
 
-	let nextRefresh = Date.now() + 1000 * 30; // add 30 second to now
+	let nextRefresh = Date.now() + 1000 * 10;
 	widget.refreshAfterDate = new Date(nextRefresh);
 
 	// add bus service and arrival time
@@ -90,8 +105,9 @@ async function createWidget(loc, service, arrivalTimes, busDeckTypes) {
 
 	console.log(arrivalTimes);
 	let arrivalTimeText = arrivalTimes
+		.filter(time => time !== null)
 		.map((time) => {
-			if (typeof time !== "number") {
+			if (!time) {
 				return "";
 			}
 
@@ -127,6 +143,8 @@ async function createWidget(loc, service, arrivalTimes, busDeckTypes) {
 				return "S";
 			} else if (type === "DD") {
 				return "D";
+			} else if (type === "BD") {
+				return "B";
 			} else {
 				return "";
 			}
@@ -141,7 +159,7 @@ async function createWidget(loc, service, arrivalTimes, busDeckTypes) {
 	return widget;
 }
 
-async function createMsgWidget(msg) {
+async function createErrWidget(msg) {
 	let widget = new ListWidget();
 	widget.setPadding(2, 2, 2, 2);
 
@@ -153,5 +171,5 @@ async function createMsgWidget(msg) {
 	widMsg.font = Font.boldSystemFont(6);
 	widMsg.centerAlignText();
 
-	return widget
+	return widget;
 }
