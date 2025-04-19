@@ -82,23 +82,3 @@ As of the November 2023 Patch,
 ## Feature Tracking
 
 All features are now being tracked in [Issues](https://github.com/LZXCorp/iOSBusTimings/issues).
-
-## Coming Soon
-
-From the April 2024 Patch,
-
-- [ ] **BUG** - Fixed Issues with timings showing `NaN`
-\
-Worked on features,
-
-- [ ] **FEATURE** - Medium Widget (occupies 2 spaces) for better visibility and more room for extra features
-
-\
-To-do but not actively being worked on,
-
-- [ ] **LIMIT** - Label limitation of 11 characters.
-- [ ] **QOL** - Shows the last updated time of the widget.
-- [ ] **FEATURE** - Ability through parameters to change what information is shown at the bottom. (I.e. instead of showing type of bus, it will show the bus load.)
-
-\
-A simple project made by LZX.
