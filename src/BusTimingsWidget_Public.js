@@ -5,12 +5,14 @@
 // Bus Timings Widget, Made by LZX
 // Use this with the Scriptable Application.
 
-// NOTE: THIS WAS DESIGNED TO BE USED ON THE LOCKSCREEN
-// Parameter Format: <label>,<bus stop id>,<bus service>
+// NOTE: THIS IS DESIGNED TO BE USED ON THE LOCKSCREEN ONLY
+// Valid Configuration:	all lockscreen widget sizing
+// Parameter Format:	<label>,<bus stop id>,<bus service>
 // e.g. STADIUM,80199,11
 
 const api_key = "";		// API key for the bus API
 
+// check: widget params
 let param;
 try {
 	param = args.widgetParameter;
@@ -27,7 +29,15 @@ if (paramArray.length !== 3) {
 	Script.complete();
 }
 
+// query bus timing API
 const [loc_label, busStopId, service] = paramArray;
+
+// verify: verify widget params
+if (loc_label.length >= 12) {
+	let widget = await createErrWidget("Invalid Params");
+	Script.setWidget(widget);
+	Script.complete();
+}
 
 let busInfo = await getBusTimings(busStopId, service);
 if (!busInfo) { 
@@ -38,9 +48,28 @@ if (!busInfo) {
 
 let { arrivalTimes, busDeckTypes } = busInfo;
 
-let widget = await createMainWidget(loc_label, service, arrivalTimes, busDeckTypes);
+// check: widget configs
+if (!config.runsInAccessoryWidget) {
+	let widget = await createErrWidget("Invalid Widget");
+	Script.setWidget(widget);
+	Script.complete();
+}
+
+let widget;
+if (config.widgetFamily === 'accessoryCircular') {
+	widget = await createMainWidget(loc_label, service, arrivalTimes, busDeckTypes);
+} else if (config.widgetFamily === 'accessoryRectangular') {
+	widget = await createRecMainWidget(loc_label, service, arrivalTimes, busDeckTypes);
+} else {
+	widget = await createErrWidget("Invalid Widget");
+	Script.setWidget(widget);
+	Script.complete();
+}
+
+// end
 Script.setWidget(widget);
 Script.complete();
+
 
 async function getBusTimings(busStopID, service) {
 	let params = `BusStopCode=${busStopID}&ServiceNo=${service}`;
@@ -86,7 +115,6 @@ async function createMainWidget(loc, service, arrivalTimes, busDeckTypes) {
 	let nextRefresh = Date.now() + 1000 * 10;
 	widget.refreshAfterDate = new Date(nextRefresh);
 
-	// add bus service and arrival time
 	let location = widget.addText(loc);
 	location.font = Font.boldSystemFont(6);
 	location.centerAlignText();
@@ -124,6 +152,8 @@ async function createMainWidget(loc, service, arrivalTimes, busDeckTypes) {
 		})
 		.join(" ");
 
+	console.log(arrivalTimeText);
+
 	const NO_SERVICE = arrivalTimeText.trim().length === 0;
 	if (NO_SERVICE) {
 		arrivalTimeText = "NO SERVICE";
@@ -156,6 +186,105 @@ async function createMainWidget(loc, service, arrivalTimes, busDeckTypes) {
 	busDeckSize.centerAlignText();
 
 	widget.addSpacer();
+	return widget;
+}
+
+async function createRecMainWidget(loc, service, arrivalTimes, busDeckTypes) {
+	let widget = new ListWidget();
+	widget.setPadding(2, 2, 2, 2);
+
+	let nextRefresh = Date.now() + 1000 * 10;
+	widget.refreshAfterDate = new Date(nextRefresh);
+
+	let mainStack = widget.addStack();
+	mainStack.layoutHorizontally();
+	mainStack.centerAlignContent();
+
+	// Bus Information (Left - 1/4 of space)
+	let leftStack = mainStack.addStack();
+	leftStack.layoutVertically();
+	leftStack.size = new Size(60, 0); // Reduced width (1/4 of total width)
+	leftStack.spacing = 2;
+
+	let busService = leftStack.addText(service);
+	if (service.length > 2) {
+		busService.font = Font.boldSystemFont(24 - 4 * (service.length - 2)); // Slightly smaller
+	} else {
+		busService.font = Font.boldSystemFont(24); // Slightly smaller
+	}
+	busService.leftAlignText();
+
+	let location = leftStack.addText(loc);
+	location.font = Font.boldSystemFont(9);
+	location.leftAlignText();
+
+	mainStack.addSpacer(5); // Add spacing between left and right stacks
+
+	// Arrival Information (Right - 3/4 of space)
+	let rightStack = mainStack.addStack();
+	rightStack.layoutVertically();
+	rightStack.spacing = 2;
+	
+	let title = rightStack.addText("ARRIVAL (MIN)");
+	title.font = Font.boldSystemFont(8);
+	title.centerAlignText();
+	
+	// Process arrival times
+	let arrivalTimeText = arrivalTimes
+		.filter(time => time !== null)
+		.map((time) => {
+			if (!time) {
+				return "";
+			}
+
+			let arrivalTime = new Date(time);
+			let now = new Date();
+			let diff = Math.floor((arrivalTime - now) / 1000 / 60);
+			if (diff === 0) {
+				return "A";
+			} else if (diff < 0) {
+				return "L";
+			} else {
+				return diff.toString();
+			}
+		})
+		.join(", ");
+
+	const NO_SERVICE = arrivalTimeText.trim().length === 0;
+	if (NO_SERVICE) {
+		arrivalTimeText = "NO SERVICE";
+	}
+	
+	let arrivalTime = rightStack.addText(arrivalTimeText);
+	if (NO_SERVICE) {
+		arrivalTime.font = Font.boldSystemFont(10);
+	} else {
+		arrivalTime.font = Font.boldSystemFont(14);
+	}
+	arrivalTime.centerAlignText();
+	
+	// Bus deck types
+	let busDeckSizeText = busDeckTypes
+		.filter((_, index) => arrivalTimes[index] !== null)
+		.map((type) => {
+			if (type === "SD") {
+				return "S";
+			} else if (type === "DD") {
+				return "D";
+			} else if (type === "BD") {
+				return "B";
+			} else {
+				return "";
+			}
+		})
+		.join(", ");
+
+	if (busDeckSizeText) {
+		let busDeckSize = rightStack.addText(busDeckSizeText);
+		busDeckSize.font = Font.boldSystemFont(8);
+		busDeckSize.centerAlignText();
+	}
+	
 	return widget;
 }
 
