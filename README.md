@@ -60,9 +60,9 @@ This only works for Singapore Public Bus Transits.
 
 | Acryonym | Full Name                        |
 | :------: | -------------------------------- |
-|    L     | Low Load (Seats Available)       |
-|    M     | Medium Load (Standing Available) |
-|    H     | High Load (Limited Standing)     |
+|    ●     | Low Load (Seats Available)       |
+|    ◐     | Medium Load (Standing Available) |
+|    ○     | High Load (Limited Standing)     |
 
 ## ⚠️ Limitations ⚠️
 
@@ -84,4 +84,4 @@ As of the 25Q1 Patch,
 All features are now being tracked in [Issues](https://github.com/LZXCorp/iOSBusTimings/issues).
 
 \
-*A simple project made by LZX.*
+_A simple project made by LZX._
