@@ -41,12 +41,12 @@ if (loc_label.length >= 12) {
 
 let busInfo = await getBusTimings(busStopId, service);
 if (!busInfo) { 
-	let widget = await createErrWidget("Invalid Params");
+	let widget = await createErrWidget("API Fetch Err");
 	Script.setWidget(widget);
 	Script.complete();
 }
 
-let { arrivalTimes, busDeckTypes } = busInfo;
+let { arrivalTimes, busDeckTypes, busLoads } = busInfo;
 
 // check: widget configs
 if (!config.runsInAccessoryWidget) {
@@ -59,11 +59,9 @@ let widget;
 if (config.widgetFamily === 'accessoryCircular') {
 	widget = await createMainWidget(loc_label, service, arrivalTimes, busDeckTypes);
 } else if (config.widgetFamily === 'accessoryRectangular') {
-	widget = await createRecMainWidget(loc_label, service, arrivalTimes, busDeckTypes);
+	widget = await createRecMainWidget(loc_label, service, arrivalTimes, busDeckTypes, busLoads);
 } else {
 	widget = await createErrWidget("Invalid Widget");
-	Script.setWidget(widget);
-	Script.complete();
 }
 
 // end
@@ -90,8 +88,10 @@ async function getBusTimings(busStopID, service) {
 
 	let services = data.Services;
 	let firstService = services && services.length > 0 ? services[0] : undefined;
+
 	let arrivalTimes = [];
 	let busDeckTypes = [];
+	let busLoads = [];
 
 	for (let i = 1; i <= 3; i++) {
 		let nextBus =
@@ -100,12 +100,14 @@ async function getBusTimings(busStopID, service) {
 				: firstService[`NextBus${i === 1 ? "" : i}`];
 		let estimatedArrival = nextBus === null ? null : nextBus.EstimatedArrival;
 		let busDeckType = nextBus === null ? "" : nextBus.Type;
+		let busLoad = nextBus === null ? "" : nextBus.Load;
 
 		arrivalTimes.push(estimatedArrival);
 		busDeckTypes.push(busDeckType);
+		busLoads.push(busLoad);
 	}
 
-	return { arrivalTimes, busDeckTypes };
+	return { arrivalTimes, busDeckTypes, busLoads };
 }
 
 async function createMainWidget(loc, service, arrivalTimes, busDeckTypes) {
@@ -189,7 +191,7 @@ async function createMainWidget(loc, service, arrivalTimes, busDeckTypes) {
 	return widget;
 }
 
-async function createRecMainWidget(loc, service, arrivalTimes, busDeckTypes) {
+async function createRecMainWidget(loc, service, arrivalTimes, busDeckTypes, busLoads) {
 	let widget = new ListWidget();
 	widget.setPadding(2, 2, 2, 2);
 
@@ -200,17 +202,17 @@ async function createRecMainWidget(loc, service, arrivalTimes, busDeckTypes) {
 	mainStack.layoutHorizontally();
 	mainStack.centerAlignContent();
 
-	// Bus Information (Left - 1/4 of space)
+	// Bus Information
 	let leftStack = mainStack.addStack();
 	leftStack.layoutVertically();
-	leftStack.size = new Size(60, 0); // Reduced width (1/4 of total width)
+	leftStack.size = new Size(60, 0);
 	leftStack.spacing = 2;
 
 	let busService = leftStack.addText(service);
 	if (service.length > 2) {
-		busService.font = Font.boldSystemFont(24 - 4 * (service.length - 2)); // Slightly smaller
+		busService.font = Font.boldSystemFont(24 - 4 * (service.length - 2));
 	} else {
-		busService.font = Font.boldSystemFont(24); // Slightly smaller
+		busService.font = Font.boldSystemFont(24);
 	}
 	busService.leftAlignText();
 
@@ -218,9 +220,8 @@ async function createRecMainWidget(loc, service, arrivalTimes, busDeckTypes) {
 	location.font = Font.boldSystemFont(9);
 	location.leftAlignText();
 
-	mainStack.addSpacer(5); // Add spacing between left and right stacks
+	mainStack.addSpacer(5);		// 1/4 Left Stack, 3/4 Right Stack
 
-	// Arrival Information (Right - 3/4 of space)
 	let rightStack = mainStack.addStack();
 	rightStack.layoutVertically();
 	rightStack.spacing = 2;
@@ -263,26 +264,38 @@ async function createRecMainWidget(loc, service, arrivalTimes, busDeckTypes) {
 	}
 	arrivalTime.centerAlignText();
 	
-	// Bus deck types
-	let busDeckSizeText = busDeckTypes
-		.filter((_, index) => arrivalTimes[index] !== null)
-		.map((type) => {
+	// Bus deck types and load info
+	let busInfoArray = busDeckTypes
+		.map((type, index) => {
+			if (arrivalTimes[index] === null) return null;
+			
+			let deckType = "";
 			if (type === "SD") {
-				return "S";
+				deckType = "S";
 			} else if (type === "DD") {
-				return "D";
+				deckType = "D";
 			} else if (type === "BD") {
-				return "B";
-			} else {
-				return "";
+				deckType = "B";
 			}
+			
+			let load = "";
+			if (busLoads[index] === "SEA") {
+				load = "●";
+			} else if (busLoads[index] === "SDA") {
+				load = "◐";
+			} else if (busLoads[index] === "LSD") {
+				load = "○";
+			}
+			
+			return deckType + (load ? " " + load : "");
 		})
+		.filter(info => info !== null)
 		.join(", ");
 
-	if (busDeckSizeText) {
-		let busDeckSize = rightStack.addText(busDeckSizeText);
-		busDeckSize.font = Font.boldSystemFont(8);
-		busDeckSize.centerAlignText();
+	if (busInfoArray) {
+		let busInfoText = rightStack.addText(busInfoArray);
+		busInfoText.font = Font.boldSystemFont(8);
+		busInfoText.centerAlignText();
 	}
 	
 	return widget;
@@ -300,5 +313,5 @@ async function createErrWidget(msg) {
 	widMsg.font = Font.boldSystemFont(6);
 	widMsg.centerAlignText();
 
-	return widget;
+	return widget
 }
